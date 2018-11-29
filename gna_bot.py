@@ -9,6 +9,8 @@ from requests.auth import HTTPBasicAuth
 
 
 class Shobot(discord.Client):
+    server_url = 'http://gna.ezo2.eu/'
+
     token = "MzkxNjU3NzkwNTI5MzM5Mzky.Ds4d0A.0TLZHalY_NLbv4eK0aAfottaYjw"  # Mettez dans cette variable le token du bot
     trust = ["Shobu13#3927",
              "Utilisateur 2"]  # Mettez dans cette variable les utilisateurs pouvant utiliser les commandes restreintes
@@ -26,7 +28,7 @@ class Shobot(discord.Client):
         global blacklist
         await self.wait_until_ready()
         while not self.is_closed:
-            response = requests.get("http://127.0.0.1:8000/bot/word_blacklist/").json()
+            response = requests.get("{}bot/word_blacklist/".format(self.server_url)).json()
             blacklist = response.get('words')
             assert isinstance(blacklist, str)
             blacklist = blacklist.replace(" ", "")
@@ -269,11 +271,11 @@ class Shobot(discord.Client):
             'identifiant': str(role.id),
             'name': role.name
         }
-        response = requests.post("http://127.0.0.1:8000/bot/role/", data=data,
+        response = requests.post("{}bot/role/".format(self.server_url), data=data,
                                  auth=HTTPBasicAuth('admin', 'sysadmin')).json()
 
     async def on_server_role_delete(self, role):
-        response = requests.delete("http://127.0.0.1:8000/bot/role/{}".format(str(role.id)),
+        response = requests.delete("{}bot/role/{}".format(self.server_url, str(role.id)),
                                    auth=HTTPBasicAuth('admin', 'sysadmin'))
 
     async def on_server_role_update(self, role_before, role_after):
@@ -281,7 +283,7 @@ class Shobot(discord.Client):
             'identifiant': str(role_after.id),
             'name': role_after.name
         }
-        response = requests.patch("http://127.0.0.1:8000/bot/role/{}/".format(role_before.id),
+        response = requests.patch("{}bot/role/{}/".format(self.server_url, role_before.id),
                                   data=data,
                                   auth=HTTPBasicAuth('admin', 'sysadmin'))
 
@@ -297,7 +299,7 @@ class Shobot(discord.Client):
             return i
 
     def get_default_role(self):
-        response = requests.get("http://127.0.0.1:8000/bot/role/get_default/").json()
+        response = requests.get("{}bot/role/get_default/".format(self.server_url)).json()
         print(response)
         for role in self.get_first_server().role_hierarchy:
             if role.id == response.get('identifiant'):
